@@ -1,12 +1,14 @@
+let href = "";
 document.querySelector("input").addEventListener("change", (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
         if (file.type.startsWith("image/")) {
-            document.body.innerHTML = `<img src='${reader.result}'>`
+            document.body.innerHTML = `<a href="${reader.result}" download><img src='${reader.result}'></a>`;
         };
         if (file.type.endsWith("csv")) {
             let body = [];
+            let head = [];
             const lines = reader.result.split('\n').map(i => i.split(","));
             head = lines[0].map(i => (`<th>${i}</th>`)).join("");
             for (let i = 1; i < lines.length; i++) {
@@ -14,7 +16,9 @@ document.querySelector("input").addEventListener("change", (e) => {
                 body += arr.map(i => (`<td>${i}</td>`)).join("");
                 body = `<tr>${body}</tr>`
             }
-            document.body.innerHTML = `<table>${head}${body}</table>`;
+            const blob = new Blob([reader.result], { type: "text/plain" });
+            href = URL.createObjectURL(blob);
+            document.body.innerHTML = `<a href="${href}" download='mydata.csv'><table>${head}${body}</table></a>`;
         }
     }
     if (file.type.endsWith("csv")) {
@@ -25,3 +29,9 @@ document.querySelector("input").addEventListener("change", (e) => {
     }
 
 })
+
+setTimeout(() => {
+    URL.revokeObjectURL(href);
+}, 1000);
+
+
